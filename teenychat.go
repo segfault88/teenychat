@@ -21,6 +21,8 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var serverHub hub
+
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
 	if r.URL.Path != "/" {
@@ -41,23 +43,8 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn.WriteJSON(map[string]interface{}{"hello": "world"})
-	go func() {
-		for {
-			messageType, message, err := conn.ReadMessage()
-			if err != nil {
-				log.Println("ReadMessage failed", err)
-				return
-			}
-			log.Printf("Message type: %d message: %s", messageType, message)
-			response := append([]byte("pong: "), message...)
-			if err = conn.WriteMessage(1, response); err != nil {
-				log.Println("WriteMessage 'pong' failed", err)
-				return
-			}
-
-		}
-	}()
+	client := wssClient{conn: conn}
+	serverHub.connect(&client)
 }
 
 func main() {
@@ -65,6 +52,8 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
+
+	serverHub.start()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", serveIndex)
@@ -89,6 +78,8 @@ func main() {
 
 	<-stop
 	log.Println("Shutting down server...")
+
+	serverHub.stop()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
