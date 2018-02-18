@@ -19,9 +19,15 @@
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
+[[projects]]
+  name = "github.com/rs/xid"
+  packages = ["."]
+  revision = "02dd45c33376f85d1064355dc790dcc4850596b1"
+  version = "v1.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "088f442c02f6dd9247181389238d420a13d54a92b55b01a0a97a85299d86223b"
+  inputs-digest = "bc92ef57d7aea853d10ce0e4b7e1343777e7cbb068202b09f7bb1026d7ea5dfd"
   solver-name = "gps-cdcl"
   solver-version = 1

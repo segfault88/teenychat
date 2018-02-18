@@ -1,14 +1,38 @@
 package main
 
 import (
+	"fmt"
 	"log"
+
+	"github.com/rs/xid"
 
 	"github.com/gorilla/websocket"
 )
 
 type wssClient struct {
+	id   string
 	hub  *hub
 	conn *websocket.Conn
+}
+
+func (c *wssClient) getID() string {
+	return c.id
+}
+
+func (c *wssClient) getDesc() string {
+	return fmt.Sprintf(
+		"wss %s -> %s",
+		c.conn.LocalAddr().String(),
+		c.conn.RemoteAddr().String())
+}
+
+func newWssClient(conn *websocket.Conn) client {
+	// use xid to identify this client uniquely
+	id := xid.New()
+	return &wssClient{
+		id:   id.String(),
+		conn: conn,
+	}
 }
 
 func (c *wssClient) joined(h *hub) {
