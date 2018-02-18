@@ -21,7 +21,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var serverHub hub
+var chatHub hub
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
@@ -44,7 +44,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := wssClient{conn: conn}
-	serverHub.connect(&client)
+	chatHub.connect(&client)
 }
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	serverHub.start()
+	chatHub.start()
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", serveIndex)
@@ -79,7 +79,7 @@ func main() {
 	<-stop
 	log.Println("Shutting down server...")
 
-	serverHub.stop()
+	chatHub.stop()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()

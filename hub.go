@@ -6,6 +6,8 @@ import (
 
 type client interface {
 	joined(h *hub)
+	close()
+	sendMessage(m interface{})
 }
 
 type hub struct {
@@ -15,11 +17,14 @@ type hub struct {
 }
 
 func (h *hub) start() {
-
+	h.shutdown = make(chan bool)
 }
 
 func (h *hub) stop() {
 	close(h.shutdown)
+	for _, c := range h.clients {
+		c.close()
+	}
 	h.wg.Wait()
 }
 

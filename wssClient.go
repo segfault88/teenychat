@@ -14,9 +14,19 @@ type wssClient struct {
 func (c *wssClient) joined(h *hub) {
 	c.hub = h
 	go c.handleInput()
+
+	m := map[string]interface{}{"hello": "world!"}
+	c.sendMessage(m)
+}
+
+func (c *wssClient) close() {
+	c.conn.Close()
+	c.conn = nil
+	c.hub = nil
 }
 
 func (c *wssClient) handleInput() {
+	defer c.hub.wg.Done()
 	for {
 		messageType, message, err := c.conn.ReadMessage()
 		if err != nil {
@@ -31,4 +41,8 @@ func (c *wssClient) handleInput() {
 			return
 		}
 	}
+}
+
+func (c *wssClient) sendMessage(m interface{}) {
+	c.conn.WriteJSON(m)
 }
