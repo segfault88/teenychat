@@ -17,12 +17,10 @@ type hub struct {
 	clients  map[string]client
 	wg       sync.WaitGroup
 	shutdown chan bool
-
-	clientToTopics  map[string][]string
-	topicsToClients map[string][]string
 }
 
 func (h *hub) start() {
+	h.clients = make(map[string]client)
 	h.shutdown = make(chan bool)
 }
 
