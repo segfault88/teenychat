@@ -68,7 +68,7 @@ func main() {
 		}
 	}()
 
-	// seperate server for pprof and stuff
+	// separate server for pprof and stuff
 	go func() {
 		err := http.ListenAndServe("localhost:6060", nil)
 		if err != nil {
