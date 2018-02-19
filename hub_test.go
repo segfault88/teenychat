@@ -1,16 +1,22 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/rs/xid"
+)
 
 type mockClient struct {
+	id string
 }
 
 func (mc *mockClient) getID() string {
-	return "mock"
+	return mc.id
 }
 
 func (mc *mockClient) getDesc() string {
-	return "mock"
+	return fmt.Sprintf("mock %s", mc.id)
 }
 
 func (mc *mockClient) joined(h *hub) {
@@ -30,7 +36,8 @@ func TestHub(t *testing.T) {
 	chatHub.start()
 
 	for i := 0; i < 10; i++ {
-		c := &mockClient{}
+		id := xid.New()
+		c := &mockClient{id: id.String()}
 		chatHub.connect(c)
 	}
 }
