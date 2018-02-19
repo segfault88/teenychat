@@ -9,33 +9,33 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type wssClient struct {
+type wsClient struct {
 	id   string
 	hub  *hub
 	conn *websocket.Conn
 }
 
-func (c *wssClient) getID() string {
+func (c *wsClient) getID() string {
 	return c.id
 }
 
-func (c *wssClient) getDesc() string {
+func (c *wsClient) getDesc() string {
 	return fmt.Sprintf(
 		"wss %s -> %s",
 		c.conn.LocalAddr().String(),
 		c.conn.RemoteAddr().String())
 }
 
-func newWssClient(conn *websocket.Conn) client {
+func newWsClient(conn *websocket.Conn) client {
 	// use xid to identify this client uniquely
 	id := xid.New()
-	return &wssClient{
+	return &wsClient{
 		id:   id.String(),
 		conn: conn,
 	}
 }
 
-func (c *wssClient) joined(h *hub) {
+func (c *wsClient) joined(h *hub) {
 	c.hub = h
 	go c.handleInput()
 
@@ -43,13 +43,13 @@ func (c *wssClient) joined(h *hub) {
 	c.sendMessage(m)
 }
 
-func (c *wssClient) close() {
+func (c *wsClient) close() {
 	c.conn.Close()
 	c.conn = nil
 	c.hub = nil
 }
 
-func (c *wssClient) handleInput() {
+func (c *wsClient) handleInput() {
 	defer c.hub.wg.Done()
 	for {
 		messageType, message, err := c.conn.ReadMessage()
@@ -59,14 +59,10 @@ func (c *wssClient) handleInput() {
 		}
 
 		log.Printf("Message type: %d message: %s", messageType, message)
-		response := append([]byte("pong: "), message...)
-		if err = c.conn.WriteMessage(1, response); err != nil {
-			log.Println("WriteMessage 'pong' failed", err)
-			return
-		}
+		c.hub.send(messageType, string(message))
 	}
 }
 
-func (c *wssClient) sendMessage(m interface{}) {
-	c.conn.WriteJSON(m)
+func (c *wsClient) sendMessage(m interface{}) error {
+	return c.conn.WriteJSON(m)
 }

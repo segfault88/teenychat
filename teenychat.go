@@ -43,7 +43,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := newWssClient(conn)
+	client := newWsClient(conn)
 	chatHub.connect(client)
 }
 

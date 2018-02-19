@@ -10,7 +10,7 @@ type client interface {
 	getDesc() string
 	joined(h *hub)
 	close()
-	sendMessage(m interface{})
+	sendMessage(m interface{}) error
 }
 
 type hub struct {
@@ -41,4 +41,12 @@ func (h *hub) connect(c client) {
 	c.joined(h)
 
 	log.Printf("Client %s %s joined\n", c.getID(), c.getDesc())
+}
+
+func (h *hub) send(messageType int, message string) {
+	log.Printf("Message type %d ignored for now", messageType)
+	for _, c := range h.clients {
+		err := c.sendMessage(map[string]interface{}{"topic": "", "message": message})
+		log.Printf("Send error %s", err)
+	}
 }
